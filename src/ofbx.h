@@ -11,11 +11,6 @@ typedef unsigned int u32;
 typedef unsigned long long u64;
 typedef long long i64;
 
-static_assert(sizeof(u8) == 1, "u8 is not 1 byte");
-static_assert(sizeof(u32) == 4, "u32 is not 4 bytes");
-static_assert(sizeof(u64) == 8, "u64 is not 8 bytes");
-static_assert(sizeof(i64) == 8, "i64 is not 8 bytes");
-
 
 struct Vec2
 {
@@ -55,9 +50,11 @@ struct Color
 
 struct DataView
 {
-	const u8* begin = nullptr;
-	const u8* end = nullptr;
-	bool is_binary = true;
+	const u8* begin;
+	const u8* end;
+	bool is_binary;
+
+	DataView(): begin(0), end(0), is_binary(true) {}
 
 	bool operator!=(const char* rhs) const { return !(*this == rhs); }
 	bool operator==(const char* rhs) const;
@@ -68,7 +65,7 @@ struct DataView
 	u32 toU32() const;
 	double toDouble() const;
 	float toFloat() const;
-	
+
 	template <int N>
 	void toString(char(&out)[N]) const
 	{
@@ -87,17 +84,17 @@ struct DataView
 
 struct IElementProperty
 {
-	enum Type : unsigned char
+	enum Type
 	{
-		LONG = 'L',
-		INTEGER = 'I',
-		STRING = 'S',
-		FLOAT = 'F',
-		DOUBLE = 'D',
-		ARRAY_DOUBLE = 'd',
-		ARRAY_INT = 'i',
-		ARRAY_LONG = 'l',
-		ARRAY_FLOAT = 'f'
+		Type_LONG = 'L',
+		Type_INTEGER = 'I',
+		Type_STRING = 'S',
+		Type_FLOAT = 'F',
+		Type_DOUBLE = 'D',
+		Type_ARRAY_DOUBLE = 'd',
+		Type_ARRAY_INT = 'i',
+		Type_ARRAY_LONG = 'l',
+		Type_ARRAY_FLOAT = 'f'
 	};
 	virtual ~IElementProperty() {}
 	virtual Type getType() const = 0;
@@ -121,15 +118,15 @@ struct IElement
 };
 
 
-enum class RotationOrder
+enum RotationOrder
 {
-	EULER_XYZ,
-	EULER_XZY,
-	EULER_YZX,
-	EULER_YXZ,
-	EULER_ZXY,
-	EULER_ZYX,
-	SPHERIC_XYZ // Currently unsupported. Treated as EULER_XYZ.
+	RotationOrder_EULER_XYZ,
+	RotationOrder_EULER_XZY,
+	RotationOrder_EULER_YZX,
+	RotationOrder_EULER_YXZ,
+	RotationOrder_EULER_ZXY,
+	RotationOrder_EULER_ZYX,
+	RotationOrder_SPHERIC_XYZ // Currently unsupported. Treated as EULER_XYZ.
 };
 
 
@@ -141,22 +138,22 @@ struct IScene;
 
 struct Object
 {
-	enum class Type
+	enum Type
 	{
-		ROOT,
-		GEOMETRY,
-		MATERIAL,
-		MESH,
-		TEXTURE,
-		LIMB_NODE,
-		NULL_NODE,
-		NODE_ATTRIBUTE,
-		CLUSTER,
-		SKIN,
-		ANIMATION_STACK,
-		ANIMATION_LAYER,
-		ANIMATION_CURVE,
-		ANIMATION_CURVE_NODE
+		Type_ROOT,
+		Type_GEOMETRY,
+		Type_MATERIAL,
+		Type_MESH,
+		Type_TEXTURE,
+		Type_LIMB_NODE,
+		Type_NULL_NODE,
+		Type_NODE_ATTRIBUTE,
+		Type_CLUSTER,
+		Type_SKIN,
+		Type_ANIMATION_STACK,
+		Type_ANIMATION_LAYER,
+		Type_ANIMATION_CURVE,
+		Type_ANIMATION_CURVE_NODE
 	};
 
 	Object(const Scene& _scene, const IElement& _element);
@@ -189,7 +186,7 @@ struct Object
 
 	template <typename T> T* resolveObjectLink(int idx) const
 	{
-		return static_cast<T*>(resolveObjectLink(T::s_type, nullptr, idx));
+		return static_cast<T*>(resolveObjectLink(T::s_type, 0, idx));
 	}
 
 	u64 id;
@@ -213,7 +210,7 @@ struct Texture : Object
 		COUNT
 	};
 
-	static const Type s_type = Type::TEXTURE;
+	static const Type s_type = Type_TEXTURE;
 
 	Texture(const Scene& _scene, const IElement& _element);
 	virtual DataView getFileName() const = 0;
@@ -223,7 +220,7 @@ struct Texture : Object
 
 struct Material : Object
 {
-	static const Type s_type = Type::MATERIAL;
+	static const Type s_type = Type_MATERIAL;
 
 	Material(const Scene& _scene, const IElement& _element);
 
@@ -234,7 +231,7 @@ struct Material : Object
 
 struct Cluster : Object
 {
-	static const Type s_type = Type::CLUSTER;
+	static const Type s_type = Type_CLUSTER;
 
 	Cluster(const Scene& _scene, const IElement& _element);
 
@@ -250,7 +247,7 @@ struct Cluster : Object
 
 struct Skin : Object
 {
-	static const Type s_type = Type::SKIN;
+	static const Type s_type = Type_SKIN;
 
 	Skin(const Scene& _scene, const IElement& _element);
 
@@ -261,7 +258,7 @@ struct Skin : Object
 
 struct NodeAttribute : Object
 {
-	static const Type s_type = Type::NODE_ATTRIBUTE;
+	static const Type s_type = Type_NODE_ATTRIBUTE;
 
 	NodeAttribute(const Scene& _scene, const IElement& _element);
 
@@ -271,7 +268,7 @@ struct NodeAttribute : Object
 
 struct Geometry : Object
 {
-	static const Type s_type = Type::GEOMETRY;
+	static const Type s_type = Type_GEOMETRY;
 	static const int s_uvs_max = 4;
 
 	Geometry(const Scene& _scene, const IElement& _element);
@@ -293,7 +290,7 @@ struct Geometry : Object
 
 struct Mesh : Object
 {
-	static const Type s_type = Type::MESH;
+	static const Type s_type = Type_MESH;
 
 	Mesh(const Scene& _scene, const IElement& _element);
 
@@ -306,7 +303,7 @@ struct Mesh : Object
 
 struct AnimationStack : Object
 {
-	static const Type s_type = Type::ANIMATION_STACK;
+	static const Type s_type = Type_ANIMATION_STACK;
 
 	AnimationStack(const Scene& _scene, const IElement& _element);
 	virtual const AnimationLayer* getLayer(int index) const = 0;
@@ -315,7 +312,7 @@ struct AnimationStack : Object
 
 struct AnimationLayer : Object
 {
-	static const Type s_type = Type::ANIMATION_LAYER;
+	static const Type s_type = Type_ANIMATION_LAYER;
 
 	AnimationLayer(const Scene& _scene, const IElement& _element);
 
@@ -326,7 +323,7 @@ struct AnimationLayer : Object
 
 struct AnimationCurve : Object
 {
-	static const Type s_type = Type::ANIMATION_CURVE;
+	static const Type s_type = Type_ANIMATION_CURVE;
 
 	AnimationCurve(const Scene& _scene, const IElement& _element);
 
@@ -338,7 +335,7 @@ struct AnimationCurve : Object
 
 struct AnimationCurveNode : Object
 {
-	static const Type s_type = Type::ANIMATION_CURVE_NODE;
+	static const Type s_type = Type_ANIMATION_CURVE_NODE;
 
 	AnimationCurveNode(const Scene& _scene, const IElement& _element);
 
@@ -406,20 +403,38 @@ enum FrameRate
 
 struct GlobalSettings
 {
-	UpVector UpAxis = UpVector_AxisX;
-	int UpAxisSign = 1;
-	FrontVector FrontAxis = FrontVector_ParityOdd;
-	int FrontAxisSign = 1;
-	CoordSystem CoordAxis = CoordSystem_RightHanded;
-	int CoordAxisSign = 1;
-	int OriginalUpAxis = 0;
-	int OriginalUpAxisSign = 1;
-	float UnitScaleFactor = 1;
-	float OriginalUnitScaleFactor = 1;
-	u64 TimeSpanStart = 0L;
-	u64 TimeSpanStop = 0L;
-	FrameRate TimeMode = FrameRate_DEFAULT;
-	float CustomFrameRate = -1.0f;
+	UpVector UpAxis;
+	int UpAxisSign;
+	FrontVector FrontAxis;
+	int FrontAxisSign;
+	CoordSystem CoordAxis;
+	int CoordAxisSign;
+	int OriginalUpAxis;
+	int OriginalUpAxisSign;
+	float UnitScaleFactor;
+	float OriginalUnitScaleFactor;
+	u64 TimeSpanStart;
+	u64 TimeSpanStop;
+	FrameRate TimeMode;
+	float CustomFrameRate;
+
+	GlobalSettings()
+		: UpAxis(UpVector_AxisX)
+		, UpAxisSign(1)
+		, FrontAxis(FrontVector_ParityOdd)
+		, FrontAxisSign(1)
+		, CoordAxis(CoordSystem_RightHanded)
+		, CoordAxisSign(1)
+		, OriginalUpAxis(0)
+		, OriginalUpAxisSign(1)
+		, UnitScaleFactor(1)
+		, OriginalUnitScaleFactor(1)
+		, TimeSpanStart(0L)
+		, TimeSpanStop(0L)
+		, TimeMode(FrameRate_DEFAULT)
+		, CustomFrameRate(-1.0f)
+	{
+	}
 };
 
 
