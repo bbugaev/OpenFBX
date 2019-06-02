@@ -381,7 +381,7 @@ struct Property : IElementProperty
 	Type getType() const { return (Type)type; }
 	IElementProperty* getNext() const { return next; }
 	DataView getValue() const { return value; }
-	int getCount() const override
+	int getCount() const
 	{
 		assert(type == Type_ARRAY_DOUBLE || type == Type_ARRAY_INT || type == Type_ARRAY_FLOAT || type == Type_ARRAY_LONG);
 		if (value.is_binary)
@@ -1051,7 +1051,7 @@ struct MeshImpl : Mesh
 	}
 
 
-	Matrix getGeometricMatrix() const override
+	Matrix getGeometricMatrix() const
 	{
 		Vec3 translation = resolveVec3Property(*this, "GeometricTranslation", createVec3(0, 0, 0));
 		Vec3 rotation = resolveVec3Property(*this, "GeometricRotation", createVec3(0, 0, 0));
@@ -1321,7 +1321,7 @@ struct AnimationStackImpl : AnimationStack
 	}
 
 
-	const AnimationLayer* getLayer(int index) const override
+	const AnimationLayer* getLayer(int index) const
 	{
 		return resolveObjectLink<AnimationLayer>(index);
 	}
@@ -1446,7 +1446,7 @@ struct Scene : IScene
 	int getAllObjectCount() const { return (int)m_all_objects.size(); }
 
 
-	const AnimationStack* getAnimationStack(int index) const override
+	const AnimationStack* getAnimationStack(int index) const
 	{
 		assert(index >= 0);
 		assert(index < m_animation_stacks.size());
@@ -1454,7 +1454,7 @@ struct Scene : IScene
 	}
 
 
-	const Mesh* getMesh(int index) const override
+	const Mesh* getMesh(int index) const
 	{
 		assert(index >= 0);
 		assert(index < m_meshes.size());
@@ -1462,7 +1462,7 @@ struct Scene : IScene
 	}
 
 
-	const TakeInfo* getTakeInfo(const char* name) const override
+	const TakeInfo* getTakeInfo(const char* name) const
 	{
 		for (size_t i = 0; i < m_take_infos.size(); ++i)
 		{
@@ -1528,13 +1528,13 @@ struct AnimationCurveNodeImpl : AnimationCurveNode
 	}
 
 
-	const Object* getBone() const override
+	const Object* getBone() const
 	{
 		return bone;
 	}
 
 
-	Vec3 getNodeLocalTransform(double time) const override
+	Vec3 getNodeLocalTransform(double time) const
 	{
 		i64 fbx_time = secondsToFbxTime(time);
 		return createVec3(getCoord(curves[0], fbx_time), getCoord(curves[1], fbx_time), getCoord(curves[2], fbx_time));
@@ -1590,14 +1590,14 @@ struct AnimationLayerImpl : AnimationLayer
 	Type getType() const { return Type_ANIMATION_LAYER; }
 
 
-	const AnimationCurveNode* getCurveNode(int index) const override
+	const AnimationCurveNode* getCurveNode(int index) const
 	{
 		if (index >= curve_nodes.size() || index < 0) return 0;
 		return curve_nodes[index];
 	}
 
 
-	const AnimationCurveNode* getCurveNode(const Object& bone, const char* prop) const override
+	const AnimationCurveNode* getCurveNode(const Object& bone, const char* prop) const
 	{
 		for (size_t i = 0; i < curve_nodes.size(); ++i)
 		{
