@@ -139,14 +139,14 @@ static void setTranslation(const Vec3& t, Matrix* mtx)
 }
 
 
-Vec3 createVec3(double x, double y, double z)
+static Vec3 createVec3(double x, double y, double z)
 {
 	Vec3 vec3 = {x, y, z};
 	return vec3;
 }
 
 
-Color createColor(float r, float g, float b)
+static Color createColor(float r, float g, float b)
 {
 	Color color = {r, g, b};
 	return color;
